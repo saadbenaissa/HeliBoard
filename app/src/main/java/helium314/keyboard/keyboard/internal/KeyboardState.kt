@@ -454,6 +454,13 @@ class KeyboardState(private val switchActions: SwitchActions) {
             Log.d(TAG, "onEvent: code=${Constants.printableCode(code)} ${stateToString(autoCapsFlags, recapitalizeMode)}")
         }
 
+        // Fork change: like iOS, return to the letters layout right after typing a symbol.
+        // Digits, space and enter keep the symbols layout. Sliding input (hold ?123, slide, release)
+        // is skipped here because onFinishSlidingInput already handles going back.
+        if ((mode == Mode.SYMBOLS || mode == Mode.SYMBOLS_SHIFTED) && !isInLayoutSlide && isSymbolToReturnFrom(code)) {
+            resetToAlpha(autoCapsFlags, recapitalizeMode)
+        }
+
         if (mode in Settings.getValues().mAlphaAfterSpace) {
             if (isSpaceOrEnter(code)) {
                 if (isInSpaceToAlpha) {
@@ -524,5 +531,8 @@ class KeyboardState(private val switchActions: SwitchActions) {
         private const val DEBUG_EVENT = false
 
         private fun isSpaceOrEnter(c: Int) = c == Constants.CODE_SPACE || c == Constants.CODE_ENTER
+
+        private fun isSymbolToReturnFrom(c: Int) = c == KeyCode.MULTIPLE_CODE_POINTS
+                || (Constants.isLetterCode(c) && !isSpaceOrEnter(c) && !Character.isDigit(c))
     }
 }
