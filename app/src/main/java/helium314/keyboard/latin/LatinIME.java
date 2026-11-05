@@ -1371,6 +1371,14 @@ public class LatinIME extends InputMethodService implements
      *  Checks if a recent clipboard suggestion is available. If available, it is set in suggestion strip.
      *  returns whether a clipboard suggestion has been set.
      */
+    // Fork change: shows the result of a calculation like "1+1=" in the suggestion strip.
+    public boolean tryShowCalculatorSuggestion() {
+        View calculatorView = Calculator.getSuggestionView(this, getCurrentInputEditorInfo(), mSuggestionStripView);
+        if (calculatorView == null || !hasSuggestionStripView()) return false;
+        mSuggestionStripView.setExternalSuggestionView(calculatorView, false);
+        return true;
+    }
+
     public boolean tryShowClipboardSuggestion() {
         if (!hasSuggestionStripView()) return false;
         View clipboardView = mClipboardHistoryManager.getClipboardSuggestionView(getCurrentInputEditorInfo(), mSuggestionStripView);
@@ -1389,6 +1397,7 @@ public class LatinIME extends InputMethodService implements
     @Override
     public void setNeutralSuggestionStrip() {
         final SettingsValues currentSettings = mSettings.getCurrent();
+        if (tryShowCalculatorSuggestion()) return; // fork change
         if (tryShowClipboardSuggestion()) {
             // clipboard suggestion has been set
             if (hasSuggestionStripView() && currentSettings.mAutoHideToolbar)

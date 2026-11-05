@@ -1708,6 +1708,10 @@ public final class InputLogic {
             startTimeMillis = SystemClock.elapsedRealtime();
             Log.d(TAG, "performUpdateSuggestionStripSync()");
         }
+        // Fork change: a calculation like "1+1=" right before the cursor takes priority over word suggestions.
+        if (!mWordComposer.isComposingWord() && mLatinIME.tryShowCalculatorSuggestion()) {
+            return;
+        }
         // Check if we have a suggestion engine attached.
         if (!settingsValues.needsToLookupSuggestions()) {
             if (mWordComposer.isComposingWord()) {
